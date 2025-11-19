@@ -10,7 +10,7 @@ auto timer = timer_create_default();
 void setup() {
   Serial.begin(baud_rate);
 
-  timer.every(SAMPLING, anemometer_measure);
+  timer.every(SAMPLING, measure);
 }
 
 void loop() {

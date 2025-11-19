@@ -14,3 +14,6 @@ const short SAMPLING = 100;     // milliseconds
 
 // average filter variables
 //const int win = 10;
+
+// anemometer measure variables
+const float a_slope = 2.8; // for linear function
