@@ -13,4 +13,7 @@ extern const short SAMPLING;     // milliseconds
 // average filter variables
 //extern const int win;
 
+// anemometer measure variables
+extern const float a_slope; // for linear function
+
 #endif // GLOBALS_H

@@ -2,6 +2,6 @@
 #define SENSORS_H
 
 // Function to measure value of anemometer
-bool anemometer_measure(void *);
+float anemometer_measure();
 
 #endif // SENSORS_H
