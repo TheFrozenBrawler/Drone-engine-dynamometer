@@ -2,7 +2,6 @@
 
 #include <Arduino.h>
 #include <Wire.h>
-#include <SoftWire.h>   
 #include <Adafruit_AHTX0.h>
 
 #include "globals.h"
@@ -20,6 +19,17 @@ float avg_filter(float sample, int win, float *buffer, int *index, float *sum) {
   return average;
 }
 
+// connect and test AHT20 temperature sensor
+void connect_AHT20(Adafruit_AHTX0 *aht20) {
+  if (!aht20->begin()) {
+    Serial.println(F("Błąd: nie wykryto AHT20!"));
+    while (1) delay(10);
+  } else {
+    Serial.println(F("AHT20 OK"));
+  }
+}
+
+// main measure function
 bool measure(void *aht20_ptr) {
   Adafruit_AHTX0* aht20 = (Adafruit_AHTX0*) aht20_ptr;
   float air_speed = anemometer_measure();
@@ -31,13 +41,4 @@ bool measure(void *aht20_ptr) {
   Serial.println(temperature, 2);
 
   return true;
-}
-
-void connect_AHT20(Adafruit_AHTX0 *aht20) {
-  if (!aht20->begin()) {
-    Serial.println(F("Błąd: nie wykryto AHT20!"));
-    while (1) delay(10);
-  } else {
-    Serial.println(F("AHT20 OK"));
-  }
 }
