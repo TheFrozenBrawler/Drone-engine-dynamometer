@@ -1,5 +1,6 @@
-// for arduino mega
-#include <arduino-timer.h>
+// Works only on arduino Uno R4 wifi or other board with Renesas RA4M1 chip
+
+#include <FspTimer.h>
 #include <Wire.h>
 #include <Adafruit_AHTX0.h>
 
@@ -8,8 +9,8 @@
 #include "sensors.h"
 
 
-auto timer = timer_create_default(); 
 Adafruit_AHTX0 aht20;
+volatile bool perform_measure = false;
 
 void setup() {
   Serial.begin(BAUD_RATE);
@@ -18,12 +19,19 @@ void setup() {
   // I2C setup
   Wire.begin();
 
-  // test sensors
+  // Test sensors
   connect_AHT20(&aht20);
 
-  timer.every(SAMPLING, measure, &aht20);
+  // Timer setup
+  if (!timer_setup(SAMPLING)) {
+    Serial.println("[ERROR] Tmer initialization fault!");
+    while(1);
+  }
 }
 
 void loop() {
-  timer.tick();
+  if (perform_measure == true) {
+      perform_measure = false;
+      measure(&aht20);
+  }
 }
