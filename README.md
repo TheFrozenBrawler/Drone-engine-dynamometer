@@ -12,3 +12,11 @@ This version of software implements timer interrupt. Because there are different
 | Suszarka 1    | 0.8         | 4.8              |
 | Suszarka 2    | 2.45        | 6.5              |
 | odkurzacz     | 3.44        | 9.3              |
+
+## MLX90614 sensor - info
+### Effective distance
+The effective distance of the MLX90614 sensor is approximately 1.5 cm, FOV = 90deg.
+
+### Emissivity
+The emissivity value for the MLX90614 sensor is set to XX
+The surface of measurement should be coated with black electric tape.
