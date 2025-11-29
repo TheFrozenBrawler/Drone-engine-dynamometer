@@ -4,12 +4,22 @@
 #include <FspTimer.h>
 #include <Wire.h>
 #include <Adafruit_AHTX0.h>
+#include <Adafruit_MLX90614.h>
 
 #include "globals.h"
+#include "logger.h"
 #include "sensors.h"
 
 ////////// SENSOR HELP FUNCTIONS //////////
-// average filter
+/**
+* @brief Perform filtration on given samples with average filter
+*
+* @param sample The sample that has been currently measured
+* @param win The filter window, average of how many samples will be calculated
+* @param buffer Pointer to buffer with samples
+* @param index The index of current sample inside buffer
+* @param sum Sum of all samples inside buffer   
+*/
 float avg_filter(float sample, int win, float *buffer, int *index, float *sum) {  
   *sum -= buffer[*index];
   buffer[*index] = sample;
@@ -20,41 +30,92 @@ float avg_filter(float sample, int win, float *buffer, int *index, float *sum) {
 
   return average;
 }
-
-// connect and test AHT20 temperature sensor
-void connect_AHT20(Adafruit_AHTX0 *aht20) {
+/**
+ * @brief Connect and test sensors
+ * 
+ * @param aht20 Pointer to AHT20 sensor's class object
+ * @param mlxA Pointer to MLX A sensor's class object
+ * @param mlxB Pointer to MLX B sensor's class object
+ */
+void connect_sensors(Adafruit_AHTX0 *aht20, Adafruit_MLX90614 *mlxA, Adafruit_MLX90614 *mlxB) {
+  // Check AHT20
   if (!aht20->begin()) {
-    Serial.println(F("[ERROR] AHT20 not detected!"));
+    LOG_E("AHT20 not detected!");
     while (1) delay(10);
   } else {
-    Serial.println(F("[INFO] AHT20 OK"));
+    LOG_I("AHT20 OK");
+  }
+
+  // Check MLXA
+  if (!mlxA->begin(MLXA_ADDR)) {
+    LOG_E("MLX A not detected!");
+    while (1) delay(10);
+  } else {
+    LOG_I("MLX A OK");
+
+  }
+
+  // Check MLXB
+  if (!mlxB->begin(MLXB_ADDR)) {
+    LOG_E("MLX B not detected!");
+    while (1) delay(10);
+  } else {
+    LOG_I("MLX B OK");
   }
 }
 
 ////////// MEASURE //////////
-// main measure function
-bool measure(void *aht20_ptr) {
-  Adafruit_AHTX0* aht20 = (Adafruit_AHTX0*) aht20_ptr;
+/**
+ * @brief Main function to perform all the measurements
+ * 
+ * @param aht20 Pointer to AHT20 sensor's class object
+ * @param mlxA Pointer to MLX A sensor's class object
+ * @param mlxB Pointer to MLX B sensor's class object
+ */
+bool measure(Adafruit_AHTX0 *aht20_ptr, Adafruit_MLX90614 *mlxA_ptr, Adafruit_MLX90614 *mlxB_ptr) {
   float air_speed = anemometer_measure();
-  float temperature = temperature_measure(aht20);
+  
+  // Adafruit_AHTX0* aht20 = (Adafruit_AHTX0*) aht20_ptr;
+  float T_AHT20 = aht20_temperature_measure(aht20_ptr);
+  float T_MLXA = mlx_temperature_measure(mlxA_ptr);
+  float T_MLXB = mlx_temperature_measure(mlxB_ptr);
 
-  Serial.print(F("[MEAS] Air speed: "));
-  Serial.print(air_speed, 2);
-  Serial.print(F("; Temperature: "));
-  Serial.println(temperature, 2);
+  LOG_TAG_M();
+
+  LOG_M("Air speed: ");
+  SEND_MEAS(air_speed, 2);
+
+  LOG_M(" Temperature AHT20: ");
+  SEND_MEAS(T_AHT20, 2);
+
+  LOG_M(" Temperature MLX A: ");
+  SEND_MEAS(T_MLXA, 2);
+
+  LOG_M(" Temperature MLX B: ");
+  SEND_MEAS(T_MLXB, 2);
+
+  SEND_ENDLN();
 
   return true;
 }
 
 ////////// TIMERS ////////// 
-// Timer interrupt function
+/**
+ * @brief Timer interrupt function that rises flag to perform measurements
+ * 
+ * @param args Pointer to pass arguments - UNUSED
+ */
 extern bool perform_measure;
 void onTimerCallback(timer_callback_args_t *args) {
   perform_measure = true;
 }
 
-// Timer setup
 FspTimer timer;
+/**
+ * @brief Function to setup measurement timer
+ * 
+ * @param tim_period_ms Variable to pass timer period value, in miliseconds
+ */
 bool timer_setup(uint16_t tim_period_ms) {
   uint8_t timer_type = GPT_TIMER;
   float tim_freq = 1 / ((float)tim_period_ms / 1000);
