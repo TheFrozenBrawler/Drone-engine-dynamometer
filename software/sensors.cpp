@@ -1,12 +1,12 @@
 #include "sensors.h"
-
 #include <Arduino.h>
 #include <Adafruit_AHTX0.h>
 
 #include "globals.h"
 #include "functions.h"
 
-// Anemometer
+////////// Anemometer //////////
+// Main function to measure air speed 
 static float anem_buffer[ANEM_WIN];
 static int anem_index = 0;
 static float anem_sum = 0.0;
@@ -24,8 +24,8 @@ float anemometer_measure(){
   return air_speed;
 }
 
-///////////////////////////////
-// Temperature sensor
+////////// Temperature sensor //////////
+// Main function to measure temperature
 static float temp_buffer[TEMP_WIN];
 static int temp_index = 0;
 static float temp_sum = 0.0;

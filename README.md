@@ -1,6 +1,9 @@
 # Hamownia_software
 This is a project hosting software for hamownia - dynamometr of drone engines. This is a part of our master's thesis
 
+## Timer Interrupt - IMPORTANT!
+This version of software implements timer interrupt. Because there are different ways to implement it between chips, this software version works only with Renesas RA4M1 chips, ex. Arduino UNO R4.
+
 ## Anemometer scaling
 ### Calibration points
 | Type of point | Voltage (V) | Wind speed (m/s) |
