@@ -5,6 +5,7 @@
 #include <Wire.h>
 #include <Adafruit_AHTX0.h>
 #include <Adafruit_MLX90614.h>
+#include <HX711.h>
 
 #include "globals.h"
 #include "logger.h"
@@ -72,13 +73,17 @@ void connect_sensors(Adafruit_AHTX0 *aht20, Adafruit_MLX90614 *mlxA, Adafruit_ML
  * @param mlxA Pointer to MLX A sensor's class object
  * @param mlxB Pointer to MLX B sensor's class object
  */
-bool measure(Adafruit_AHTX0 *aht20_ptr, Adafruit_MLX90614 *mlxA_ptr, Adafruit_MLX90614 *mlxB_ptr) {
+bool measure(Adafruit_AHTX0 *aht20_ptr,
+             Adafruit_MLX90614 *mlxA_ptr, 
+             Adafruit_MLX90614 *mlxB_ptr,
+             HX711 *tensometer) {
   float air_speed = anemometer_measure();
   
   // Adafruit_AHTX0* aht20 = (Adafruit_AHTX0*) aht20_ptr;
   float T_AHT20 = aht20_temperature_measure(aht20_ptr);
   float T_MLXA = mlx_temperature_measure(mlxA_ptr);
   float T_MLXB = mlx_temperature_measure(mlxB_ptr);
+  float tensometer_val = ten
 
   LOG_TAG_M();
 
