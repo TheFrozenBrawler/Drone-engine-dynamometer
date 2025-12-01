@@ -1,5 +1,5 @@
 # Hamownia_software
-This is a project hosting software for hamownia - dynamometr of drone engines. This is a part of our master's thesis
+This is a project hosting software for "hamownia" - dynamometr of drone engines. This is a part of our master's thesis
 
 ## Timer Interrupt - IMPORTANT!
 This version of software implements timer interrupt. Because there are different ways to implement it between chips, this software version works only with Renesas RA4M1 chips, ex. Arduino UNO R4.
@@ -9,9 +9,11 @@ This version of software implements timer interrupt. Because there are different
 | Type of point | Voltage (V) | Wind speed (m/s) |
 |---------------|-------------|------------------|
 | Zero          | 0.0         | 0.0              |
-| Suszarka 1    | 0.8         | 4.8              |
-| Suszarka 2    | 2.45        | 6.5              |
-| odkurzacz     | 3.44        | 9.3              |
+| Setting 1     | 0.8         | 4.8              |
+| Setting 2     | 2.45        | 6.5              |
+| Setting 3     | 3.44        | 9.3              |
+
+Use more precise air device and real anemometer to scale
 
 ## MLX90614 sensor - info
 ### Effective distance
