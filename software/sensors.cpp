@@ -2,6 +2,7 @@
 #include <Arduino.h>
 #include <Adafruit_AHTX0.h>
 #include <Adafruit_MLX90614.h>
+#include <Adafruit_HX711.h>
 
 #include "globals.h"
 #include "functions.h"
@@ -61,4 +62,19 @@ float aht20_temperature_measure(Adafruit_AHTX0 *aht20) {
 */
 float mlx_temperature_measure(Adafruit_MLX90614 *mlx_ptr) {
   return mlx_ptr->readObjectTempC();
+}
+
+////////// Tensometer //////////
+/**
+* @brief Perform tensometer measurement
+*
+* @param tensometer Pointer to object of Adafruit_HX711.h sensor class
+*
+* @return Measured floating point value
+*/
+float tensometer_measure(Adafruit_HX711 *tensometer) {
+  int32_t tensometer_val_raw = tensometer->readChannelBlocking(CHAN_A_GAIN_128);
+  float tensometer_val_scaled = (double)tensometer_val_raw / 100.0;
+
+  return tensometer_val_scaled;
 }
