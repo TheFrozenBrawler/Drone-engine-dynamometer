@@ -5,6 +5,7 @@
 #include <Wire.h>
 #include <Adafruit_AHTX0.h>
 #include <Adafruit_MLX90614.h>
+#include <Adafruit_HX711.h>
 
 #include "globals.h"
 #include "logger.h"
@@ -37,8 +38,8 @@ float avg_filter(float sample, int win, float *buffer, int *index, float *sum) {
  * @param mlxA Pointer to MLX A sensor's class object
  * @param mlxB Pointer to MLX B sensor's class object
  */
-void connect_sensors(Adafruit_AHTX0 *aht20, Adafruit_MLX90614 *mlxA, Adafruit_MLX90614 *mlxB) {
-  // Check AHT20
+void connect_sensors(Adafruit_AHTX0 *aht20, Adafruit_MLX90614 *mlxA, Adafruit_MLX90614 *mlxB, Adafruit_HX711 *tensometer) {
+  // Connect and check AHT20
   if (!aht20->begin()) {
     LOG_E("AHT20 not detected!");
     while (1) delay(10);
@@ -46,7 +47,7 @@ void connect_sensors(Adafruit_AHTX0 *aht20, Adafruit_MLX90614 *mlxA, Adafruit_ML
     LOG_I("AHT20 OK");
   }
 
-  // Check MLXA
+  // Connect and check MLXA
   if (!mlxA->begin(MLXA_ADDR)) {
     LOG_E("MLX A not detected!");
     while (1) delay(10);
@@ -55,12 +56,26 @@ void connect_sensors(Adafruit_AHTX0 *aht20, Adafruit_MLX90614 *mlxA, Adafruit_ML
 
   }
 
-  // Check MLXB
+  // Connect and check MLXB
   if (!mlxB->begin(MLXB_ADDR)) {
     LOG_E("MLX B not detected!");
     while (1) delay(10);
   } else {
     LOG_I("MLX B OK");
+  }
+
+  // Connect, calibrate and check tensometer
+  tensometer->begin();
+  Serial.println("\n\TENSOMETER CALIBRATION\n===========");
+  Serial.println("remove all weight from the loadcell");
+  //  flush Serial input
+  while (Serial.available()) Serial.read();
+  Serial.println("and press enter\n");
+  while (Serial.available() == 0);
+  Serial.println("Tareing...");
+  for (uint8_t t=0; t<3; t++) {
+    tensometer->tareA(tensometer->readChannelRaw(CHAN_A_GAIN_128));
+    tensometer->tareA(tensometer->readChannelRaw(CHAN_A_GAIN_128));
   }
 }
 
@@ -71,14 +86,17 @@ void connect_sensors(Adafruit_AHTX0 *aht20, Adafruit_MLX90614 *mlxA, Adafruit_ML
  * @param aht20 Pointer to AHT20 sensor's class object
  * @param mlxA Pointer to MLX A sensor's class object
  * @param mlxB Pointer to MLX B sensor's class object
+ * @param tensometer Pointer to tensometer's class object
  */
-bool measure(Adafruit_AHTX0 *aht20_ptr, Adafruit_MLX90614 *mlxA_ptr, Adafruit_MLX90614 *mlxB_ptr) {
+bool measure(Adafruit_AHTX0 *aht20_ptr,
+             Adafruit_MLX90614 *mlxA_ptr, 
+             Adafruit_MLX90614 *mlxB_ptr,
+             Adafruit_HX711 *tensometer) {
   float air_speed = anemometer_measure();
-  
-  // Adafruit_AHTX0* aht20 = (Adafruit_AHTX0*) aht20_ptr;
   float T_AHT20 = aht20_temperature_measure(aht20_ptr);
   float T_MLXA = mlx_temperature_measure(mlxA_ptr);
   float T_MLXB = mlx_temperature_measure(mlxB_ptr);
+  float tensometer_val = tensometer_measure(tensometer);
 
   LOG_TAG_M();
 
@@ -93,6 +111,9 @@ bool measure(Adafruit_AHTX0 *aht20_ptr, Adafruit_MLX90614 *mlxA_ptr, Adafruit_ML
 
   LOG_M(" Temperature MLX B: ");
   SEND_MEAS(T_MLXB, 2);
+
+  LOG_M(" Tensometer: ");
+  SEND_MEAS(tensometer_val, 2);
 
   SEND_ENDLN();
 

@@ -28,4 +28,10 @@
 #define MLXA_ADDR 0x5A
 #define MLXB_ADDR 0x5B
 
+// Tensometer setup
+#define TENS_DT_PIN 6
+#define TENS_SCK_PIN 7
+#define TENS_OFFSET 163927
+#define TENS_SETSCALE 112.587975
+
 #endif // GLOBALS_H

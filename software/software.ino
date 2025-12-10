@@ -4,6 +4,7 @@
 #include <Wire.h>
 #include <Adafruit_AHTX0.h>
 #include <Adafruit_MLX90614.h>
+#include "Adafruit_HX711.h"  // install HX711.h by Rob Tillart
 
 #include "globals.h"
 #include "logger.h"
@@ -14,6 +15,7 @@
 Adafruit_AHTX0 aht20;                           // temperature sensor
 Adafruit_MLX90614 mlxA;// = Adafruit_MLX90614();   // IR temperature sensor, object A
 Adafruit_MLX90614 mlxB;// = Adafruit_MLX90614();   // IR temperature sensor, object B
+Adafruit_HX711 tensometer(TENS_DT_PIN, TENS_SCK_PIN);
 
 // Timer interrupt flag
 volatile bool perform_measure = false;          
@@ -27,7 +29,7 @@ void setup() {
   Wire.begin();
 
   // Test sensors connection
-  connect_sensors(&aht20, &mlxA, &mlxB);
+  connect_sensors(&aht20, &mlxA, &mlxB, &tensometer);
 
   // Timer setup
   if (!timer_setup(SAMPLING)) {
@@ -39,6 +41,6 @@ void setup() {
 void loop() {
   if (perform_measure == true) {
       perform_measure = false;
-      measure(&aht20, &mlxA, &mlxB);
+      measure(&aht20, &mlxA, &mlxB, &tensometer);
   }
 }
