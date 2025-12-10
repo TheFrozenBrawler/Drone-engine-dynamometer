@@ -5,6 +5,8 @@
 #include <Wire.h>
 #include <Adafruit_AHTX0.h>
 #include <Adafruit_MLX90614.h>
+#include <Adafruit_HX711.h>
+#include <Adafruit_INA228.h>
 
 #include "globals.h"
 #include "logger.h"
@@ -37,8 +39,8 @@ float avg_filter(float sample, int win, float *buffer, int *index, float *sum) {
  * @param mlxA Pointer to MLX A sensor's class object
  * @param mlxB Pointer to MLX B sensor's class object
  */
-void connect_sensors(Adafruit_AHTX0 *aht20, Adafruit_MLX90614 *mlxA, Adafruit_MLX90614 *mlxB) {
-  // Check AHT20
+void connect_sensors(Adafruit_AHTX0 *aht20, Adafruit_MLX90614 *mlxA, Adafruit_MLX90614 *mlxB, Adafruit_HX711 *tensometer, Adafruit_INA228 *pwr_snsr) {
+  // Connect and check AHT20
   if (!aht20->begin()) {
     LOG_E("AHT20 not detected!");
     while (1) delay(10);
@@ -46,7 +48,7 @@ void connect_sensors(Adafruit_AHTX0 *aht20, Adafruit_MLX90614 *mlxA, Adafruit_ML
     LOG_I("AHT20 OK");
   }
 
-  // Check MLXA
+  // Connect and check MLXA
   if (!mlxA->begin(MLXA_ADDR)) {
     LOG_E("MLX A not detected!");
     while (1) delay(10);
@@ -55,13 +57,38 @@ void connect_sensors(Adafruit_AHTX0 *aht20, Adafruit_MLX90614 *mlxA, Adafruit_ML
 
   }
 
-  // Check MLXB
+  // Connect and check MLXB
   if (!mlxB->begin(MLXB_ADDR)) {
     LOG_E("MLX B not detected!");
     while (1) delay(10);
   } else {
     LOG_I("MLX B OK");
   }
+
+  // Connect, calibrate and check tensometer
+  tensometer->begin();
+  Serial.println("\n\TENSOMETER CALIBRATION\n===========");
+  Serial.println("remove all weight from the loadcell");
+  //  flush Serial input
+  while (Serial.available()) Serial.read();
+  Serial.println("and press enter\n");
+  while (Serial.available() == 0);
+  LOG_I("Tareing...");
+  for (uint8_t t=0; t<3; t++) {
+    tensometer->tareA(tensometer->readChannelRaw(CHAN_A_GAIN_128));
+  }
+
+  // Connect and check supply power sensor
+  if (!pwr_snsr->begin(PWR_SENS_ADDR)) {
+    LOG_E("Couldn't find power sensor - INA228 chip");
+    while (1);
+  } else {
+    LOG_I("Power sensor connected");
+  }
+  pwr_snsr->setShunt(0.0002, 50.0);
+  // ina228.setAveragingCount(INA228_COUNT_16);
+  // ina228.setVoltageConversionTime(INA228_TIME_150_us);
+  // ina228.setCurrentConversionTime(INA228_TIME_280_us);
 }
 
 ////////// MEASURE //////////
@@ -71,14 +98,23 @@ void connect_sensors(Adafruit_AHTX0 *aht20, Adafruit_MLX90614 *mlxA, Adafruit_ML
  * @param aht20 Pointer to AHT20 sensor's class object
  * @param mlxA Pointer to MLX A sensor's class object
  * @param mlxB Pointer to MLX B sensor's class object
+ * @param tensometer Pointer to tensometer's class object
+ * @param pwr_snsr Pointer to power sensor's class object
  */
-bool measure(Adafruit_AHTX0 *aht20_ptr, Adafruit_MLX90614 *mlxA_ptr, Adafruit_MLX90614 *mlxB_ptr) {
+bool measure(Adafruit_AHTX0 *aht20_ptr,
+             Adafruit_MLX90614 *mlxA_ptr, 
+             Adafruit_MLX90614 *mlxB_ptr,
+             Adafruit_HX711 *tensometer,
+             Adafruit_INA228 *pwr_snsr) {
   float air_speed = anemometer_measure();
-  
-  // Adafruit_AHTX0* aht20 = (Adafruit_AHTX0*) aht20_ptr;
   float T_AHT20 = aht20_temperature_measure(aht20_ptr);
   float T_MLXA = mlx_temperature_measure(mlxA_ptr);
   float T_MLXB = mlx_temperature_measure(mlxB_ptr);
+  float tensometer_val = tensometer_measure(tensometer);
+  float pwr_snsr_current = power_current_measure(pwr_snsr);
+  float pwr_snsr_voltage = power_voltage_measure(pwr_snsr);
+  float pwr_snsr_charge = power_charge_measure(pwr_snsr);
+  float pwr_snsr_temperature = power_temperature_measure(pwr_snsr);
 
   LOG_TAG_M();
 
@@ -93,6 +129,21 @@ bool measure(Adafruit_AHTX0 *aht20_ptr, Adafruit_MLX90614 *mlxA_ptr, Adafruit_ML
 
   LOG_M(" Temperature MLX B: ");
   SEND_MEAS(T_MLXB, 2);
+
+  LOG_M(" Tensometer: ");
+  SEND_MEAS(tensometer_val, 2);
+  
+  LOG_M(" Power supply A: ");
+  SEND_MEAS(pwr_snsr_current, 2);
+
+  LOG_M(" Power supply V: ");
+  SEND_MEAS(pwr_snsr_voltage, 2);
+
+  LOG_M(" Power supply charge: ");
+  SEND_MEAS(pwr_snsr_charge, 2);
+
+  LOG_M(" Power supply temperature: ");
+  SEND_MEAS(pwr_snsr_temperature, 2);
 
   SEND_ENDLN();
 

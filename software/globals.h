@@ -6,7 +6,7 @@
 #define CSV_DIV ";"         // CSV divider
 
 // Device mode (DEBUG or RUN)
-#define DEBUG   // comment this line to disable logging and enable RUN mode
+// #define DEBUG   // comment this line to disable logging and enable RUN mode
 #ifndef DEBUG
     #define RUN
 #endif
@@ -27,5 +27,14 @@
 // Temperature IR sensors consts
 #define MLXA_ADDR 0x5A
 #define MLXB_ADDR 0x5B
+
+// Tensometer setup
+#define TENS_DT_PIN 6
+#define TENS_SCK_PIN 7
+#define TENS_OFFSET 163927
+#define TENS_SETSCALE 112.587975
+
+// Power sensor setup
+#define PWR_SENS_ADDR 0x45
 
 #endif // GLOBALS_H
