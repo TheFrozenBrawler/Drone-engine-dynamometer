@@ -3,6 +3,7 @@
 #include <Adafruit_AHTX0.h>
 #include <Adafruit_MLX90614.h>
 #include <Adafruit_HX711.h>
+#include <Adafruit_INA228.h>
 
 #include "globals.h"
 #include "functions.h"
@@ -77,4 +78,41 @@ float tensometer_measure(Adafruit_HX711 *tensometer) {
   float tensometer_val_scaled = (double)tensometer_val_raw / 100.0;
 
   return tensometer_val_scaled;
+}
+
+////////// Power Sensor //////////
+/**
+* @brief Perform measurements of current from power supply
+*
+* @return Measured current value of power supply, floating point
+*/
+float power_current_measure(Adafruit_INA228 *pwr_snsr) {
+  return pwr_snsr->getCurrent_mA();
+}
+
+/**
+* @brief Perform measurements of voltage on power supply
+*
+* @return Measured voltage value of power supply, floating point
+*/
+float power_voltage_measure(Adafruit_INA228 *pwr_snsr) {
+  return pwr_snsr->getBusVoltage_V();
+}
+
+/**
+* @brief Perform measurements of charge from power supply
+*
+* @return Measured charge value of power supply, floating point
+*/
+float power_charge_measure(Adafruit_INA228 *pwr_snsr) {
+  return pwr_snsr->readCharge();
+}
+
+/**
+* @brief Perform measurements of temperature of sensor
+*
+* @return Measured temperature of sensor, floating point
+*/
+float power_temperature_measure(Adafruit_INA228 *pwr_snsr) {
+  return pwr_snsr->readDieTemp();
 }
