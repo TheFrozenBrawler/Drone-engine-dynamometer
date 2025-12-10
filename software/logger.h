@@ -16,7 +16,9 @@
     #define LOG_M(text) Serial.print(F(text))
 #else
     #define LOG_I(x)
-    #define LOG_E(x)
+    #define LOG_E(text) Serial.print(F("[ERROR] ")); \
+                        Serial.print(F(text));       \
+                        Serial.print(F("\n"))
     #define LOG_TAG_M()
     #define LOG_M(x)
 #endif
