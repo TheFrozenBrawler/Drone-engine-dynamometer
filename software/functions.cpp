@@ -108,8 +108,8 @@ bool measure(Adafruit_AHTX0 *aht20_ptr,
              Adafruit_INA228 *pwr_snsr) {
   float air_speed = anemometer_measure();
   float T_AHT20 = aht20_temperature_measure(aht20_ptr);
-  float T_MLXA = mlx_temperature_measure(mlxA_ptr);
-  float T_MLXB = mlx_temperature_measure(mlxB_ptr);
+  float T_MLXA = mlx_temperature_measure_A(mlxA_ptr);
+  float T_MLXB = mlx_temperature_measure_B(mlxB_ptr);
   float tensometer_val = tensometer_measure(tensometer);
   float pwr_snsr_current = power_current_measure(pwr_snsr);
   float pwr_snsr_voltage = power_voltage_measure(pwr_snsr);
