@@ -182,7 +182,7 @@ thread.start()
 
 # --- Real-time plot ---
 fig = plt.gcf()
-fig.set_size_inches(8, 6)  # Set initial window size (width=12in, height=10in)
+fig.set_size_inches(8.5, 6.5)  # Set initial window size (width=12in, height=10in)
 fig.canvas.manager.set_window_title('Data Receiver - Real-time Monitoring')  # Set window title
 ani = FuncAnimation(fig, update, interval=PLOT_INTERVAL_MS, cache_frame_data=False)
 plt.show(block=False)
