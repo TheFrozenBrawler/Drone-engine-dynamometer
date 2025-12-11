@@ -54,6 +54,14 @@ float aht20_temperature_measure(Adafruit_AHTX0 *aht20) {
 }
 
 ////////// IR temperature sensor //////////
+static float temp_ir_a_buffer[TEMP_IR_WIN];
+static int temp_ir_a_index = 0;
+static float temp_ir_a_sum = 0.0;
+
+static float temp_ir_b_buffer[TEMP_IR_WIN];
+static int temp_ir_b_index = 0;
+static float temp_ir_b_sum = 0.0;
+
 /**
 * @brief Return measured object temperature of one MLX90614 sensor in Celsius degrees.
 *
@@ -61,8 +69,25 @@ float aht20_temperature_measure(Adafruit_AHTX0 *aht20) {
 *
 * @return Measured floating point value.
 */
-float mlx_temperature_measure(Adafruit_MLX90614 *mlx_ptr) {
-  return mlx_ptr->readObjectTempC();
+float mlx_temperature_measure_A(Adafruit_MLX90614 *mlx_ptr) {
+  float temperature = mlx_ptr->readObjectTempC();
+  float temperature_avg = avg_filter(temperature, TEMP_IR_WIN, temp_ir_a_buffer, &temp_ir_a_index, &temp_ir_a_sum);
+
+  return temperature_avg;
+}
+
+/**
+* @brief Return measured object temperature of one MLX90614 sensor in Celsius degrees.
+*
+* @param mlx_ptr Pointer to object of Adafruit_MLX90614 sensor class
+*
+* @return Measured floating point value.
+*/
+float mlx_temperature_measure_B(Adafruit_MLX90614 *mlx_ptr) {
+  float temperature = mlx_ptr->readObjectTempC();
+  float temperature_avg = avg_filter(temperature, TEMP_IR_WIN, temp_ir_b_buffer, &temp_ir_b_index, &temp_ir_b_sum);
+
+  return temperature_avg;
 }
 
 ////////// Tensometer //////////
@@ -81,13 +106,24 @@ float tensometer_measure(Adafruit_HX711 *tensometer) {
 }
 
 ////////// Power Sensor //////////
+static float p_sens_cur_buffer[P_SENS_WIN];
+static int p_sens_cur_index = 0;
+static float p_sens_cur_sum = 0.0;
+
+static float p_sens_v_buffer[P_SENS_WIN];
+static int p_sens_v_index = 0;
+static float p_sens_v_sum = 0.0;
+
 /**
 * @brief Perform measurements of current from power supply
 *
 * @return Measured current value of power supply, floating point
 */
 float power_current_measure(Adafruit_INA228 *pwr_snsr) {
-  return pwr_snsr->getCurrent_mA();
+  float pwr_snsr_current_raw = pwr_snsr->getCurrent_mA();
+  float pwr_snsr_current_avg = avg_filter(pwr_snsr_current_raw, P_SENS_WIN, p_sens_cur_buffer, &p_sens_cur_index, &p_sens_cur_sum);
+
+  return pwr_snsr_current_avg;
 }
 
 /**
@@ -96,7 +132,10 @@ float power_current_measure(Adafruit_INA228 *pwr_snsr) {
 * @return Measured voltage value of power supply, floating point
 */
 float power_voltage_measure(Adafruit_INA228 *pwr_snsr) {
-  return pwr_snsr->getBusVoltage_V();
+  float pwr_snsr_voltage_raw = pwr_snsr->getBusVoltage_V();
+  float pwr_snsr_voltage_avg = avg_filter(pwr_snsr_voltage_raw, P_SENS_WIN, p_sens_v_buffer, &p_sens_v_index, &p_sens_v_sum);
+
+  return pwr_snsr_voltage_avg;
 }
 
 /**

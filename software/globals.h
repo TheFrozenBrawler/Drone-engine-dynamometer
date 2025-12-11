@@ -19,7 +19,9 @@
 
 // Average filter consts
 #define TEMP_WIN 5
+#define TEMP_IR_WIN 5
 #define ANEM_WIN 10
+#define P_SENS_WIN 5
 
 // Anemometer measure consts
 #define ANEM_A_SLOPE 2.8 // for linear function
