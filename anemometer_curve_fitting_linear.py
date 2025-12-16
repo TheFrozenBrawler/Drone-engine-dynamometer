@@ -3,8 +3,8 @@ from scipy.optimize import curve_fit
 from matplotlib import pyplot as plt
 
 
-x = np.array([0, 0.8, 2.45, 3.44])
-y = np.array([0, 4.8, 6.5, 9.3])
+x = np.array([0, 0.7, 0.85, 2.45, 3.2, 6.3])  # [ V ] - raw data from anemometer
+y = np.array([0, 14.5, 15.5, 22, 31.5, 43])    # [ m/s ] - data from commercial anemometer
 
 # Linear function model forced through origin: y = a*x
 def test_lin(x, a):
@@ -14,7 +14,7 @@ def test_lin(x, a):
 # Provide an initial guess and allow more function evaluations to improve convergence
 try:
     # initial guess: slope=1.0 (intercept forced to 0)
-    param, param_cov = curve_fit(test_lin, x, y, p0=[1.0])
+    param, param_cov = curve_fit(test_lin, x, y)
 except Exception as e:
     print('curve_fit failed:', e)
     raise

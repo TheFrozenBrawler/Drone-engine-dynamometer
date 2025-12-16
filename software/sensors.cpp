@@ -1,3 +1,4 @@
+#include <cmath>
 #include "sensors.h"
 #include <Arduino.h>
 #include <Adafruit_AHTX0.h>
@@ -25,7 +26,7 @@ float anemometer_measure() {
 
   float filtered_value = avg_filter(scaled_voltage, ANEM_WIN, anem_buffer, &anem_index, &anem_sum);
 
-  float air_speed = ANEM_A_SLOPE * filtered_value;
+  float air_speed = ANEM_A * std::sqrt( ANEM_B * filtered_value);
 
   return air_speed;
 }

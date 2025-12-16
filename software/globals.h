@@ -23,8 +23,10 @@
 #define ANEM_WIN 10
 #define P_SENS_WIN 5
 
-// Anemometer measure consts
-#define ANEM_A_SLOPE 2.8 // for linear function
+// Anemometer measure constants
+// air_speed = a * sqrt(b * raw_voltage)
+#define ANEM_A 4.985    // for root function
+#define ANEM_B 11.191   // for root function
 
 // Temperature IR sensors consts
 #define MLXA_ADDR 0x5A
